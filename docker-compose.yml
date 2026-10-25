@@ -1,0 +1,43 @@
+# Flint NVFP4 GGUF — llama.cpp server on a single DGX Spark (192.168.36.90)
+# Usage:  docker compose up -d ; docker compose logs -f
+# Note: uses GPU device passthrough instead of --gpus all (see .env for the
+#       NVIDIA container-toolkit workaround explanation). All values are
+#       interpolated from .env via ${VAR} (docker compose auto-reads .env).
+services:
+  flint:
+    image: ${IMAGE:-ghcr.io/ggml-org/llama.cpp:server-cuda13}
+    container_name: ${CONTAINER_NAME:-llama-flint}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:${PORT:-8005}/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    devices:
+      - /dev/nvidia0
+      - /dev/nvidiactl
+      - /dev/nvidia-uvm
+      - /dev/nvidia-modeset
+    volumes:
+      - ${NVIDIA_LIB_DIR:-/usr/lib/aarch64-linux-gnu}:/opt/drv:ro
+      - ${FLINT_MODEL_DIR}:/models:ro
+    environment:
+      - LD_LIBRARY_PATH=/opt/drv
+    ports:
+      - "${PORT:-8005}:${PORT:-8005}"
+    command: >-
+      -m /models/${FLINT_FILE:-flint-nvfp4.gguf}
+      --alias flint
+      -ngl ${N_GPU_LAYERS:-all}
+      -c ${CTX:-262144}
+      -np ${PARALLEL:-1}
+      -fa ${FAST_ATTN:-on}
+      -ctk ${CACHE_K:-f16}
+      -ctv ${CACHE_V:-f16}
+      --jinja
+      --temp ${TEMP:-1.0}
+      --top-p ${TOP_P:-0.95}
+      --top-k ${TOP_K:-20}
+      --min-p ${MIN_P:-0.0}
+      --host ${HOST:-0.0.0.0}
+      --port ${PORT:-8005}
