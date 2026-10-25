@@ -1,7 +1,7 @@
 # Flint NVFP4 GGUF — single-node launcher
 
 Serves **RecursiveSI/flint-nvfp4-gguf** (`flint-nvfp4.gguf`, 22.9 GB — custom
-`flint` architecture, packed NVFP4 weights) on one DGX Spark (192.168.36.90)
+`flint` architecture, packed NVFP4 weights) on one DGX Spark (x.x.x.x)
 with the official llama.cpp `llama-server`, OpenAI-compatible API on port **8005**.
 
 ## Why llama.cpp and not vLLM/SGLang?
@@ -63,7 +63,7 @@ docker compose up -d
 docker compose logs -f
 ```
 
-API: `http://192.168.36.90:8005/v1`  ·  health: `http://192.168.36.90:8005/health`
+API: `http://x.x.x.x:8005/v1`  ·  health: `http://x.x.x.x:8005/health`
 Served model id: `flint`  (OpenAI-compatible chat/completions, supports
 `reasoning_content`).
 
@@ -86,4 +86,4 @@ curl http://127.0.0.1:8005/v1/chat/completions -H "Content-Type: application/jso
 * `MODEL_FILE` is computed from `FLINT_MODEL_DIR` + `FLINT_FILE`; paths in
   `.env` use `~` (expanded by scripts; compose relies on `.env` interpolation).
 * The running container (`llama-flint`, port 8005) mounts the model directory
-  read-only and serves the OpenAI-compatible API on `http://192.168.36.90:8005/v1`.
+  read-only and serves the OpenAI-compatible API on `http://x.x.x.x:8005/v1`.
